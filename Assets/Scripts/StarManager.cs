@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 public class StarManager : MonoBehaviour
 {
     public static StarManager instance;
@@ -13,8 +14,12 @@ public class StarManager : MonoBehaviour
     public Star selected;
     public string nameScene;
     public bool win = false;
+    public bool lose = false;
     public float timerWin = 60;
     public GameObject winGameObject;
+    public GameObject loseGameObject;
+    public float maxTime = 60;
+    public Text textTime;
     private void Start()
     {
         if (instance != null)
@@ -25,10 +30,24 @@ public class StarManager : MonoBehaviour
         {
             instance = this;
         }
+        textTime.text = ((int)(maxTime)).ToString();
+    }
+    private void Update()
+    {
+        textTime.text = ((int)(maxTime)).ToString();
+        if (!win && !lose)
+        {
+            maxTime -= Time.deltaTime;
+            if (maxTime <= 0)
+            {
+                lose = true;
+                StartCoroutine("EndGame");
+            }
+        }
     }
     public void onClickStar(Star star)
     {
-        if (win)
+        if (win || lose)
         {
             return;
         }
@@ -77,6 +96,13 @@ public class StarManager : MonoBehaviour
     }
     IEnumerator timers()
     {
+        yield return new WaitForSeconds(timerWin);
+        SceneManager.LoadScene(nameScene);
+    }
+    IEnumerator EndGame()
+    {
+        loseGameObject.SetActive(true);
+        winGameObject.SetActive(false);
         yield return new WaitForSeconds(timerWin);
         SceneManager.LoadScene(nameScene);
     }
